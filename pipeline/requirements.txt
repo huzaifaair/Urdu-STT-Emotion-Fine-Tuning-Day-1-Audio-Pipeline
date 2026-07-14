@@ -1,0 +1,23 @@
+# Day-1 Urdu STT + Emotion pipeline — Python dependencies
+# Install with:  pip install -r pipeline/requirements.txt
+# (Run on the machine that will execute the pipeline; the eventual training box is air-gapped,
+#  so install + download models HERE before moving to the isolated environment.)
+
+# Core / already validated on Python 3.14
+numpy
+scipy
+soundfile
+noisereduce
+pyloudnorm
+tqdm
+imageio-ffmpeg        # bundles an ffmpeg binary so we don't need a system ffmpeg install
+
+# Transcription (Stage 5) — Whisper "base" multilingual handles Urdu
+openai-whisper
+
+# Diarization (Stage 3, OPTIONAL). Requires a HuggingFace token + one-time model download.
+# Install only if you will run speaker diarization before air-gapping:
+# pyannote.audio
+# huggingface_hub
+
+# (torch / torchaudio are assumed present; whisper pins a compatible numpy.)
