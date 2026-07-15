@@ -38,7 +38,7 @@ from denoise import clean_audio  # noqa: E402
 from diarize import diarize_file  # noqa: E402
 from segment import segment_audio  # noqa: E402
 
-AUDIO_EXTS = (".wav", ".mp3", ".m4a", ".flac", ".ogg")
+AUDIO_EXTS = (".wav", ".mp3", ".m4a", ".flac", ".ogg",".mpeg")
 
 
 def _sanitize(name: str) -> str:
