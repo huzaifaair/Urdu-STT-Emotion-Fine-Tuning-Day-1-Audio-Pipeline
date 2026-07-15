@@ -52,6 +52,10 @@ DATASET_VERSION = "v1"
 # Transcription
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")  # multilingual "base" handles Urdu
 
+# Transcription backend selection
+TRANSCRIPTION_BACKEND = os.environ.get("TRANSCRIPTION_BACKEND", "hf")  # "hf" = new Urdu HF model, "whisper" = legacy openai-whisper path
+HF_ASR_MODEL_ID = os.environ.get("HF_ASR_MODEL_ID", "ihanif/whisper-medium-urdu")
+
 # Diarization (optional). Requires a HuggingFace token + one-time model download.
 # Set HUGGINGFACE_TOKEN and USE_DIARIZATION=1 to enable. When disabled, every segment is
 # tagged SPEAKER_0 and crosstalk is reported as not-evaluated (see diarize.py notes).

@@ -12,8 +12,13 @@ pyloudnorm
 tqdm
 imageio-ffmpeg        # bundles an ffmpeg binary so we don't need a system ffmpeg install
 
-# Transcription (Stage 5) — Whisper "base" multilingual handles Urdu
-openai-whisper
+# Transcription (Stage 5)
+# Legacy / base-model path (openai-whisper) — no longer the default, kept for fallback/comparison.
+# openai-whisper
+# New default: Hugging Face Urdu-specific model via transformers.
+transformers
+accelerate
+librosa                # audio loading + defensive resample to 16 kHz mono
 
 # Diarization (Stage 3, OPTIONAL). Requires a HuggingFace token + one-time model download.
 # Install only if you will run speaker diarization before air-gapping:

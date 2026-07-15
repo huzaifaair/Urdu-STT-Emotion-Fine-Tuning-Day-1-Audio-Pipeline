@@ -223,3 +223,23 @@ Refer to `Material_doc/` for the full spec review, validation checklist, and ban
 - `manifest.jsonl` is append/update-only in spirit — treat it as the dataset's database, not a scratch file.
 - Always check `errors.log` after any run before assuming a step succeeded.
 - Current dataset size and known limitations (as of Day 1): ~5 hours of podcast audio, emotion classes not yet balanced, no real banking call data yet — treat any resulting model as a first-pass baseline, not production-final.
+
+## Short Pipeline
+
+Podcasts/ (raw mp3 files)
+      ↓
+run_day1.bat  →  day1_pipeline.py chalata hai
+      ↓
+   [Har podcast file pe ye 3 steps run hote hain, ek ke baad ek]
+      ↓
+STAGE 1: Denoise + Normalize  →  processed/clean/podcast/*.wav
+STAGE 2: Diarization (tag speaker)  →  abhi disabled hai, sab ko SPEAKER_0 mil raha hai
+STAGE 3: Segmentation (15-30s clips)  →  processed/segments/*.wav
+      ↓
+manifest.jsonl banta hai (har segment ka record)
+      ↓
+run_transcribe.bat  →  transcribe.py chalata hai
+      ↓
+Whisper base model har segment sunta hai, text likhta hai
+      ↓
+manifest.jsonl update hota hai (transcript field bharta hai)
