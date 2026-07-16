@@ -14,7 +14,7 @@ This module turns the Day-1 manifest into two labeled, split-ready datasets:
            accent, emotion, review_notes, reviewed_at, and verified=true.
 
 
-           
+
 
   split    80/10/10 train/val/test split, stratified by (source_type, emotion), so both the
            STT dataset and the emotion dataset keep balanced class proportions. Writes:
@@ -84,7 +84,8 @@ def _audio_rel_path(rec: dict) -> str:
 def _build_review_items(records: list[dict]) -> list[dict]:
     items = []
     for r in records:
-        draft = (r.get("transcript") or "").strip()
+        # draft = (r.get("transcript") or "").strip()
+        draft = (r.get("transcript_v2") or r.get("transcript") or "").strip()
         items.append({
             "id": r.get("segment_id"),
             "audio": _audio_rel_path(r),
