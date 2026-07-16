@@ -127,50 +127,65 @@ def _transcribe_whisper(model, wav_path) -> str:
 def _build_hf(model_id: str):
     import os
     import torch
-    # Use all available CPU cores for torch (the default is often a small subset),
-    # which materially speeds up CPU inference.
+    from transformers import WhisperProcessor, WhisperForConditionalGeneration
+
     torch.set_num_threads(os.cpu_count() or 1)
-    from transformers import WhisperForConditionalGeneration, WhisperProcessor
-    logger.info("Loading HuggingFace ASR model '%s' (CPU) ...", model_id)
+
+    logger.info("Loading HuggingFace ASR model '%s' (CPU)...", model_id)
+
     processor = WhisperProcessor.from_pretrained(model_id)
+
     model = WhisperForConditionalGeneration.from_pretrained(
-        model_id, torch_dtype="float32"
+        model_id,
+        torch_dtype=torch.float32
     )
-    # This 2023 fine-tune ships an outdated generation_config that is incompatible
-    # with passing language=/task= to generate() (huggingface/transformers#25084).
-    # The documented workaround is forced_decoder_ids, but transformers 5.x removed
-    # that as a generate() kwarg (it raises "model_kwargs are not used"). The
-    # modern equivalent is decoder_input_ids, built from the same prompt ids.
-    forced = processor.get_decoder_prompt_ids(language="urdu", task="transcribe")
-    decoder_input_ids = torch.tensor([[i for _, i in forced]], dtype=torch.long)
+
+    model.eval()
+
     logger.info("HuggingFace ASR model loaded.")
-    return processor, model, decoder_input_ids
+
+    # decoder_input_ids ki ab zarurat nahi
+    return processor, model, None
 
 
 def _transcribe_hf(processor, model, decoder_input_ids, wav_path) -> str:
-    import numpy as np
     import librosa
     import torch
-    # defensive load + resample to 16 kHz mono
-    y, _ = librosa.load(str(wav_path), sr=TARGET_SR, mono=True)
-    inputs = processor(y, sampling_rate=TARGET_SR, return_tensors="pt")
-    with torch.no_grad():
-        generated = model.generate(
-            **inputs,
-            decoder_input_ids=decoder_input_ids,
-            num_beams=1,        # greedy decoding — much faster on CPU, small quality tradeoff
-            max_new_tokens=225,  # Whisper's typical cap for a ~20-30s segment; prevents runaway generation
-        )
-    # Drop the forced prefix tokens we supplied (decoder_input_ids); this 2023
-    # fine-tune's tokenizer does not mark the prompt special tokens as
-    # special, so skip_special_tokens leaves them in. We also strip any
-    # Whisper special tokens (e.g. <|notimestamps|>) the model emits in
-    # its continuation, since the old tokenizer won't skip them either.
-    cont = generated[0][decoder_input_ids.shape[1]:]
-    text = processor.decode(cont, skip_special_tokens=True)
-    text = re.sub(r"<\|[^|]*\|>", "", text)
-    return text.strip()
 
+    y, _ = librosa.load(
+        str(wav_path),
+        sr=TARGET_SR,
+        mono=True
+    )
+
+    inputs = processor(
+        y,
+        sampling_rate=TARGET_SR,
+        return_tensors="pt"
+    )
+
+    with torch.no_grad():
+
+        generated = model.generate(
+
+            **inputs,
+
+            language="urdu",
+
+            task="transcribe",
+
+            num_beams=3,
+
+            max_new_tokens=225
+
+        )
+
+    text = processor.batch_decode(
+        generated,
+        skip_special_tokens=True
+    )[0]
+
+    return text.strip()
 
 def _print_summary(records, skipped, reprocessed, unchanged, errors) -> None:
     line = (f"SUMMARY: total={len(records)} verified_skipped={skipped} "
@@ -216,6 +231,11 @@ def main() -> None:
         else:
             n_unchanged += 1
     total = len(pending)
+    # pending = pending[:5]
+    # total = len(pending)
+
+    # logger.info("TEST MODE ENABLED")
+    # logger.info("Only first %d segments will be processed.", total)
     logger.info("Segments total=%d | verified(skipped)=%d | to-process=%d | unchanged=%d",
                 len(records), n_skipped_verified, total, n_unchanged)
     if total == 0:
