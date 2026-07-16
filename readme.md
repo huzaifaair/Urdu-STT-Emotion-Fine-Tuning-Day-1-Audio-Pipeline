@@ -45,6 +45,12 @@ Context AI/
     ├── clean/
     │   └── podcast/          ← Denoised + normalized audio (Step 1 output)
     ├── segments/              ← 15–30s clips, ready for transcription/training (Step 2–3 output)
+    ├── review/                ← Day-2 HTML review page + exported labels (manual correction)
+    │   ├── review.html         ← Open in a browser to correct transcripts + label accent/emotion
+    │   └── review_labels.json  ← Exported from the review page, merged back via run_day2_import.bat
+    ├── splits/                ← Day-2 train/val/test splits (see Day 2 below)
+    │   ├── full/  stt/  emotion/  ← each with {train,val,test}.jsonl
+    │   └── summary.json        ← split counts + per-emotion breakdown
     ├── manifest.jsonl         ← One record per segment — the master index of the dataset
     ├── pipeline.log            ← Progress log for the Day 1 pipeline
     ├── transcription.log       ← Progress log for the transcription job
@@ -124,6 +130,55 @@ Get-Content ..\processed\pipeline.log -Wait
 ```
 
 This step should take anywhere from a few minutes to an hour depending on total audio length and hardware.
+
+### Step 2 (Day 2) — Manual correction, accent/emotion labeling & dataset split
+
+These turn the draft manifest into two verified, labeled, split-ready datasets:
+
+1. **Generate the review page** (correct transcripts, tag accents, label emotions):
+
+   ```bash
+   run_day2_export.bat
+   ```
+
+   This writes `processed/review/review.html`. Open it in a browser — each segment has an
+   embedded audio player, the Whisper draft (read-only reference), a **corrected transcript**
+   box, an **accent** dropdown (karachi / lahori / punjabi_influenced / … / unknown), an
+   **emotion** dropdown (neutral / happy / angry / sad / unknown), and a **verified** checkbox.
+   Progress autosaves to the browser's localStorage; use the filter/jump box and ←/→ to navigate.
+   When done, click **Export labels** and save the JSON as `processed/review/review_labels.json`.
+
+2. **Merge the labels back into the manifest**:
+
+   ```bash
+   run_day2_import.bat
+   ```
+
+   This reads `review_labels.json` and updates every record with the corrected transcript
+   (`transcript_source="corrected"`), `accent`, `emotion`, `review_notes`, `reviewed_at`, and
+   `verified=true`. Records you didn't mark verified stay `verified=false`.
+
+3. **Build the 80/10/10 split** (stratified by `source_type` + `emotion` so both the STT and
+   emotion datasets keep balanced class proportions):
+
+   ```bash
+   run_day2_split.bat
+   ```
+
+   This writes `processed/splits/full|stt|emotion/{train,val,test}.jsonl` plus `summary.json`,
+   and stamps a `split` field onto each usable record in `manifest.jsonl`. A record is "usable"
+   when `verified=true`, its `emotion` is a real class (not `unknown`), and it has a transcript.
+
+| Output | Meaning |
+|---|---|
+| `review/review.html` | Manual review UI (audio + correction/accent/emotion forms) |
+| `review/review_labels.json` | Exported human labels (the single artifact handed back from review) |
+| `splits/full/{train,val,test}.jsonl` | Every usable, labeled record |
+| `splits/stt/{train,val,test}.jsonl` | STT dataset (corrected transcripts) |
+| `splits/emotion/{train,val,test}.jsonl` | Emotion dataset (emotion labels) |
+
+**Note:** run Step 2 (transcription) first so reviewers start from a Whisper draft rather than
+transcribing from scratch. If `review.html` shows "no transcript yet", the draft job hasn't run.
 
 ### Step 2 — Run transcription (Whisper base draft transcripts)
 

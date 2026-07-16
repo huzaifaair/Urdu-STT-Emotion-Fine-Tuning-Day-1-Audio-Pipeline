@@ -49,6 +49,25 @@ DENOISE_CHUNK_S = 30.0     # chunk length (s) for memory-bounded non-stationary 
 # Dataset / manifest
 DATASET_VERSION = "v1"
 
+# ---------------------------------------------------------------------------
+# Day-2 labeling / review / split
+# ---------------------------------------------------------------------------
+REVIEW_DIR = PROCESSED_DIR / "review"
+REVIEW_HTML = REVIEW_DIR / "review.html"
+REVIEW_LABELS = REVIEW_DIR / "review_labels.json"
+
+SPLITS_DIR = PROCESSED_DIR / "splits"
+
+# Manual-label vocabularies. "unknown" is the explicit "not yet labeled" sentinel.
+ACCENTS = ["unknown", "karachi", "lahori", "punjabi_influenced",
+           "sindhi_influenced", "pashtun_influenced", "other"]
+EMOTIONS = ["neutral", "happy", "angry", "sad"]
+EMOTION_UNKNOWN = "unknown"
+
+# Train/val/test proportions and the RNG seed used for the deterministic split.
+SPLIT_RATIOS = (0.8, 0.1, 0.1)
+SPLIT_SEED = 42
+
 # Transcription
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")  # multilingual "base" handles Urdu
 
@@ -155,3 +174,27 @@ def write_manifest_line(record: dict) -> None:
     """Append one JSON object (UTF-8) as a line to the manifest."""
     with open(MANIFEST_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def read_manifest(path: Path = MANIFEST_PATH) -> list[dict]:
+    """Load all records from a JSONL manifest. Returns [] if the file is absent."""
+    if not path.exists():
+        return []
+    records = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            records.append(json.loads(line))
+    return records
+
+
+def write_manifest(records: list[dict], path: Path = MANIFEST_PATH) -> None:
+    """Atomically rewrite a JSONL manifest (UTF-8, one record per line)."""
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        for r in records:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    tmp.replace(path)
