@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-07-20T07:23:36.022699+00:00",
+  "seed": 42,
+  "ratios": {
+    "train": 0.8,
+    "val": 0.1,
+    "test": 0.1
+  },
+  "stratified_by": [
+    "source_type",
+    "emotion"
+  ],
+  "total_usable": 653,
+  "train": 523,
+  "val": 65,
+  "test": 65,
+  "emotion_train": {
+    "neutral": 523,
+    "happy": 0,
+    "angry": 0,
+    "sad": 0
+  },
+  "emotion_val": {
+    "neutral": 65,
+    "happy": 0,
+    "angry": 0,
+    "sad": 0
+  },
+  "emotion_test": {
+    "neutral": 65,
+    "happy": 0,
+    "angry": 0,
+    "sad": 0
+  }
+}
