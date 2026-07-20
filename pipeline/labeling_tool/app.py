@@ -2,10 +2,21 @@
 Day-2 manual labeling tool for the Urdu STT + Emotion dataset.
 
 Single-page Flask app (localhost) to walk the manifest segment-by-segment and:
-  - play the segment audio (with 0.75x slow-down),
+  - play the segment audio (0.75x / 1.0x / 1.25x / 1.5x speed buttons),
   - correct the Whisper draft transcript (Urdu/RTL),
   - tag accent + emotion,
   - mark verified & save (atomic write to manifest.jsonl).
+
+Fast-paths added:
+  - "Quick Accept" (key 'a'): verify + save current accent/emotion WITHOUT
+    editing the transcript (for drafts that already look correct).
+  - "Bulk verify next N" : apply the current accent+emotion + verified=true to
+    the next N segments (manifest order), leaving their transcripts untouched and
+    skipping any already-verified.
+  - Every verification records a `verification_method` field ("manual",
+    "quick_accept", "bulk") so you can see afterward how much was fully
+    reviewed vs fast-pathed. Records lacking the field are ignored by the
+    breakdown (backward compatible).
 
 Run:  python pipeline/labeling_tool/app.py
 Then open the printed localhost URL.
@@ -144,6 +155,9 @@ def api_save():
     rec["emotion"] = body.get("emotion", rec.get("emotion"))
     if body.get("verified"):
         rec["verified"] = True
+        # how was this verified? default to manual (transcript was touched/saved),
+        # unless the client tags a fast-path method.
+        rec["verification_method"] = body.get("verification_method", "manual")
 
     try:
         save_manifest_atomic(_RECORDS)
@@ -154,6 +168,85 @@ def api_save():
     return jsonify({"ok": True, "record": light,
                     "verified": sum(1 for r in _RECORDS if r.get("verified")),
                     "total": len(_RECORDS)})
+
+
+@APP.route("/api/bulk_verify", methods=["POST"])
+def api_bulk_verify():
+    """Apply the CURRENT segment's accent + emotion + verified=true to the next N
+    segments (manifest order), without touching their transcript. Skip any that
+    are already verified. Atomic save. Returns a small confirmation summary."""
+    body = request.get_json(force=True)
+    idx = int(body["index"])
+    n = int(body.get("count", 0))
+    if idx < 0 or idx >= len(_RECORDS) or n <= 0:
+        return jsonify({"ok": False, "error": "bad index/count"}), 400
+
+    accent = body.get("accent") or _RECORDS[idx].get("accent") or ""
+    if body.get("accent_other"):
+        accent = f"Other: {body['accent_other']}"
+    emotion = body.get("emotion") or _RECORDS[idx].get("emotion") or ""
+
+    window = list(range(idx + 1, min(idx + 1 + n, len(_RECORDS))))
+    # Pre-check: flag any not-yet-verified segment in range whose draft looks like garbage.
+    flagged = [
+        _RECORDS[i].get("segment_id")
+        for i in window
+        if not _RECORDS[i].get("verified")
+        and garbage_analysis(_RECORDS[i].get("transcript") or "",
+                            float(_RECORDS[i].get("duration_seconds", 0) or 0))["flag"]
+    ]
+    if flagged and not body.get("confirm"):
+        # require explicit confirmation; report which segment IDs are likely-garbage.
+        return jsonify({
+            "ok": True,
+            "needs_confirm": True,
+            "flagged": flagged,
+            "message": "The next " + str(len(flagged)) + " segment(s) in range look like likely-garbage "
+                        "drafts (mixed Latin+Urdu / extreme length / repeated words). They will be "
+                        "left UNVERIFIED for manual review. Confirm to apply bulk-verify to the "
+                        "remaining clean segments only.",
+        })
+
+    applied, skipped, start_i = [], 0, idx + 1
+    for i in range(start_i, min(start_i + n, len(_RECORDS))):
+        rec = _RECORDS[i]
+        if rec.get("verified"):
+            skipped += 1
+            continue
+        if garbage_analysis(rec.get("transcript") or "",
+                         float(rec.get("duration_seconds", 0) or 0))["flag"]:
+            # exclude garbage drafts from bulk apply; leave them for manual review.
+            skipped += 1
+            continue
+        if accent:
+            rec["accent"] = accent
+        if emotion:
+            rec["emotion"] = emotion
+        rec["verified"] = True
+        rec["verification_method"] = "bulk"
+        applied.append(i)
+
+    if not applied:
+        return jsonify({"ok": True, "applied": [], "skipped": skipped,
+                        "message": "Nothing to apply (next segments already verified / all garbage)."})
+
+    try:
+        save_manifest_atomic(_RECORDS)
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    lo, hi = applied[0], applied[-1]
+    return jsonify({
+        "ok": True,
+        "applied": applied,
+        "skipped": skipped,
+        "message": f"Applied {emotion or '-'} / {accent or '-'} to segments {lo}-{hi} "
+                    f"({len(applied)} verified, {skipped} skipped: "
+                    f"{len(flagged)} likely-garbage left for review"
+                    + (", already-verified excluded" if skipped > len(flagged) else ""),
+        "verified": sum(1 for r in _RECORDS if r.get("verified")),
+        "total": len(_RECORDS),
+    })
 
 
 @APP.route("/audio")
@@ -228,6 +321,13 @@ def startup_scan() -> None:
             rc[reason.split(" (")[0].split(" for")[0]] += 1
     for reason, n in rc.most_common():
         print(f"    - {reason}: {n}")
+
+    # breakdown by verification method (records lacking the field are simply not counted)
+    from collections import Counter as _C2
+    vm = _C2(r.get("verification_method") for r in _RECORDS if r.get("verification_method"))
+    print(f"  verified via manual review : {vm.get('manual', 0)}")
+    print(f"  verified via quick-accept : {vm.get('quick_accept', 0)}")
+    print(f"  verified via bulk-apply   : {vm.get('bulk', 0)}")
     print("=" * 60)
 
 
@@ -283,6 +383,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <div class="nav">
       <button id="btnSlow">▶ 0.75x (slow)</button>
       <button id="btnNorm">▶ 1.0x</button>
+      <button id="btn125">▶ 1.25x</button>
+      <button id="btn150">▶ 1.5x</button>
     </div>
     <div class="nav">
       <button onclick="go(-1)">◀ Prev</button>
@@ -319,13 +421,24 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <div class="nav" style="margin-top:14px">
       <button class="primary" onclick="save(true)">✓ Mark verified &amp; next</button>
       <button class="skip" onclick="save(false)">Skip (save, no verify)</button>
+      <button id="btnQuick" onclick="quickAccept()">⚡ Quick Accept (verify, no edit)</button>
     </div>
+
+    <div class="card" style="margin-top:16px">
+      <label>Bulk verify next N (same accent + emotion as current)</label>
+      <div class="nav">
+        <input type="number" id="bulkN" value="10" min="1" style="width:90px">
+        <button id="btnBulk" onclick="bulkVerify()">Apply to next N segments</button>
+      </div>
+      <div class="reason" id="bulkStatus" style="color:#9f9"></div>
+    </div>
+
     <div class="reason" id="status" style="color:#9f9"></div>
   </div>
 </div>
 
 <script>
-let RECORDS = [], IDX = 0, SLOW = false;
+let RECORDS = [], IDX = 0, PLAYBACK_RATE = 1.0;
 
 function refreshProgress(){
   const v = RECORDS.filter(r=>r.verified).length;
@@ -346,7 +459,7 @@ function render(){
   onAccent();
   document.querySelectorAll('.emo button').forEach(b=>b.classList.toggle('active', b.dataset.emotion===r.emotion));
   document.getElementById('player').src = '/audio?file='+encodeURIComponent(r.filename)+'&source='+encodeURIComponent(r.source_type);
-  document.getElementById('player').playbackRate = SLOW ? 0.75 : 1.0;
+  document.getElementById('player').playbackRate = PLAYBACK_RATE;
   document.getElementById('status').textContent = r.verified ? '✓ already verified' : '';
 }
 function onAccent(){
@@ -379,8 +492,60 @@ function save(verify){
       } else { alert('save failed: '+d.error); }
     });
 }
-document.getElementById('btnSlow').onclick=()=>{SLOW=true; document.getElementById('player').playbackRate=0.75;};
-document.getElementById('btnNorm').onclick=()=>{SLOW=false; document.getElementById('player').playbackRate=1.0;};
+document.getElementById('btnSlow').onclick=()=>{PLAYBACK_RATE=0.75; document.getElementById('player').playbackRate=PLAYBACK_RATE;};
+document.getElementById('btnNorm').onclick=()=>{PLAYBACK_RATE=1.0; document.getElementById('player').playbackRate=PLAYBACK_RATE;};
+document.getElementById('btn125').onclick=()=>{PLAYBACK_RATE=1.25; document.getElementById('player').playbackRate=PLAYBACK_RATE;};
+document.getElementById('btn150').onclick=()=>{PLAYBACK_RATE=1.5; document.getElementById('player').playbackRate=PLAYBACK_RATE;};
+function quickAccept(){
+  const r = RECORDS[IDX];
+  const body = {
+    index: IDX,
+    transcript: document.getElementById('transcript').value,
+    accent: document.getElementById('accent').value,
+    accent_other: document.getElementById('accentOther').value,
+    emotion: r.emotion || '',
+    verified: true,
+    verification_method: 'quick_accept'   // verified without editing the transcript
+  };
+  fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){ RECORDS[IDX]=d.record; refreshProgress();
+        document.getElementById('status').textContent='⚡ quick-accepted & verified';
+        if(IDX < RECORDS.length-1){ IDX++; render(); } }
+      else alert('save failed: '+d.error);
+    });
+}
+function bulkVerify(){
+  const el=document.getElementById('bulkN'); const n=parseInt(el.value)||0;
+  if(n<=0){ alert('Enter a count > 0'); return; }
+  const r=RECORDS[IDX];
+  const body={
+    index: IDX, count: n,
+    accent: document.getElementById('accent').value,
+    accent_other: document.getElementById('accentOther').value,
+    emotion: r.emotion || ''
+  };
+  fetch('/api/bulk_verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>r.json()).then(d=>{
+      if(!d.ok){ alert('bulk failed: '+d.error); return; }
+      if(d.needs_confirm){
+        const list = d.flagged.join('\n  - ');
+        if(confirm('⚠ Likely-garbage drafts in range:\n  - '+list+
+                   '\n\nThese will be LEFT unverified for manual review. '+
+                   'Apply bulk-verify to the remaining clean segments only?')){
+          body.confirm = true;            // re-send, applying to clean segments only
+          fetch('/api/bulk_verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+            .then(r=>r.json()).then(d2=>finishBulk(d2));
+        }
+        return;
+      }
+      finishBulk(d);
+    });
+}
+function finishBulk(d){
+  fetch('/api/all').then(x=>x.json()).then(a=>{ RECORDS=a.records; refreshProgress();
+    document.getElementById('bulkStatus').textContent='✓ '+d.message; });
+}
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
   if(e.key==='1') setEmotion('neutral');
@@ -391,6 +556,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='s') save(false);
   else if(e.key==='n') nextUnverified();
   else if(e.key==='g') nextGarbage();
+  else if(e.key==='a') quickAccept();
 });
 
 fetch('/api/all').then(r=>r.json()).then(d=>{
