@@ -96,6 +96,9 @@ def _build_review_items(records: list[dict]) -> list[dict]:
             "dur": r.get("duration_seconds"),
             "speaker": r.get("speaker_id") or "",
             "draft": draft,
+            "accent": r.get("accent") or "unknown",
+            "emotion": r.get("emotion") or "unknown",
+            "verified": bool(r.get("verified")),
         })
     return items
 
@@ -425,8 +428,18 @@ let view = [];        // current filtered list of segment objects
 function initState() {
   for (const s of SEGMENTS) {
     if (!state[s.id]) {
-      state[s.id] = { corrected: s.draft || "", accent: "unknown",
-                      emotion: "unknown", verified: false, notes: "" };
+      state[s.id] = { corrected: s.draft || "", accent: s.accent || "unknown",
+                      emotion: s.emotion || "unknown", verified: !!s.verified, notes: "" };
+    } else {
+      if ((!state[s.id].accent || state[s.id].accent === "unknown") && s.accent && s.accent !== "unknown") {
+        state[s.id].accent = s.accent;
+      }
+      if ((!state[s.id].emotion || state[s.id].emotion === "unknown") && s.emotion && s.emotion !== "unknown") {
+        state[s.id].emotion = s.emotion;
+      }
+      if (s.verified && !state[s.id].verified) {
+        state[s.id].verified = true;
+      }
     }
   }
 }

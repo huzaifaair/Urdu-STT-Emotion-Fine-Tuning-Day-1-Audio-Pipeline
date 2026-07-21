@@ -15,9 +15,12 @@ imageio-ffmpeg        # bundles an ffmpeg binary so we don't need a system ffmpe
 # Transcription (Stage 5) — Whisper "base" multilingual handles Urdu
 openai-whisper
 
-# Diarization (Stage 3, OPTIONAL). Requires a HuggingFace token + one-time model download.
-# Install only if you will run speaker diarization before air-gapping:
-# pyannote.audio
-# huggingface_hub
+# Day 3 STT LoRA / PEFT Fine-Tuning dependencies
+transformers
+peft
+datasets
+evaluate
+jiwer
+accelerate
+bitsandbytes
 
-# (torch / torchaudio are assumed present; whisper pins a compatible numpy.)
