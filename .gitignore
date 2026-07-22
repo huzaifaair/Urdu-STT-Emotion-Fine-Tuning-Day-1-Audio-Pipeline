@@ -11,10 +11,10 @@ env/
 *.env
 
 # --- Logs ---
-processed/pipeline.log
-processed/transcription.log
-processed/errors.log
-*.log
+# processed/pipeline.log
+# processed/transcription.log
+# processed/errors.log
+# *.log
 
 # --- Raw & processed audio (large, regenerable, and may contain sensitive/PII data) ---
 Podcasts/

@@ -1,0 +1,87 @@
+2026-07-16 18:24:14 [INFO] Workspace: C:\Users\newst\OneDrive\Desktop\Context AI
+2026-07-16 18:24:14 [INFO] Diarization: disabled (SPEAKER_0 + crosstalk not evaluated)
+2026-07-16 18:24:14 [INFO] Outputs -> C:\Users\newst\OneDrive\Desktop\Context AI\processed
+2026-07-16 18:24:14 [INFO] [podcast] using source directory: C:\Users\newst\OneDrive\Desktop\Context AI\Podcasts
+2026-07-16 18:24:14 [INFO] ======================================================================
+2026-07-16 18:24:14 [INFO] [podcast] STAGE 1/2/3: processing All You Need To Know About Exports In Pakistan  Episode 08.mp3
+2026-07-16 18:25:15 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\podcast\All You Need To Know About Exports In Pakistan  Episode 08.wav
+2026-07-16 18:25:15 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:25:19 [INFO] Segmented All You Need To Know About Exports In Pakistan  Episode 08 -> 215 segments (1 too_short, 0 crosstalk).
+2026-07-16 18:25:22 [INFO]   done: 215 segments written for All You Need To Know About Exports In Pakistan  Episode 08.mp3
+2026-07-16 18:25:22 [INFO] ======================================================================
+2026-07-16 18:25:22 [INFO] [podcast] STAGE 1/2/3: processing Heres Why Starting Over Is Not Failure  Episode 18 (Part 02).mp3
+2026-07-16 18:25:54 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\podcast\Heres Why Starting Over Is Not Failure  Episode 18 (Part 02).wav
+2026-07-16 18:25:54 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:25:57 [INFO] Segmented Heres Why Starting Over Is Not Failure  Episode 18 (Part 02) -> 149 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:25:59 [INFO]   done: 149 segments written for Heres Why Starting Over Is Not Failure  Episode 18 (Part 02).mp3
+2026-07-16 18:25:59 [INFO] ======================================================================
+2026-07-16 18:25:59 [INFO] [podcast] STAGE 1/2/3: processing How Great Leaders Think Under Pressure (Framework Inside)  Episode 15.mp3
+2026-07-16 18:26:35 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\podcast\How Great Leaders Think Under Pressure (Framework Inside)  Episode 15.wav
+2026-07-16 18:26:35 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:26:39 [INFO] Segmented How Great Leaders Think Under Pressure (Framework Inside)  Episode 15 -> 163 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:26:42 [INFO]   done: 163 segments written for How Great Leaders Think Under Pressure (Framework Inside)  Episode 15.mp3
+2026-07-16 18:26:42 [INFO] ======================================================================
+2026-07-16 18:26:42 [INFO] [podcast] STAGE 1/2/3: processing The New Rules Of Career Growth  Episode 19.mp3
+2026-07-16 18:27:08 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\podcast\The New Rules Of Career Growth  Episode 19.wav
+2026-07-16 18:27:08 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:27:10 [INFO] Segmented The New Rules Of Career Growth  Episode 19 -> 126 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:27:12 [INFO]   done: 126 segments written for The New Rules Of Career Growth  Episode 19.mp3
+2026-07-16 18:27:12 [INFO] ======================================================================
+2026-07-16 18:27:12 [INFO] [podcast] STAGE 1/2/3: processing The Prophetic Principle That Transforms Leaders Today  Episode 14.mp3
+2026-07-16 18:28:03 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\podcast\The Prophetic Principle That Transforms Leaders Today  Episode 14.wav
+2026-07-16 18:28:03 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:08 [INFO] Segmented The Prophetic Principle That Transforms Leaders Today  Episode 14 -> 235 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:28:11 [INFO]   done: 235 segments written for The Prophetic Principle That Transforms Leaders Today  Episode 14.mp3
+2026-07-16 18:28:11 [INFO] [fresh_recording] using source directory: C:\Users\newst\OneDrive\Desktop\Context AI\fresh_rec
+2026-07-16 18:28:11 [INFO] ======================================================================
+2026-07-16 18:28:11 [INFO] [fresh_recording] STAGE 1/2/3: processing WhatsApp Audio 2026-07-14 at 8.43.49 PM.ogg
+2026-07-16 18:28:12 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\fresh_recording\WhatsApp Audio 2026-07-14 at 8.43.49 PM.wav
+2026-07-16 18:28:12 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:12 [INFO] Segmented WhatsApp Audio 2026-07-14 at 8.43.49 PM -> 4 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:28:12 [INFO]   done: 4 segments written for WhatsApp Audio 2026-07-14 at 8.43.49 PM.ogg
+2026-07-16 18:28:12 [INFO] ======================================================================
+2026-07-16 18:28:12 [INFO] [fresh_recording] STAGE 1/2/3: processing WhatsApp Audio 2026-07-14 at 8.44.36 PM.ogg
+2026-07-16 18:28:13 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\fresh_recording\WhatsApp Audio 2026-07-14 at 8.44.36 PM.wav
+2026-07-16 18:28:13 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:13 [INFO] Segmented WhatsApp Audio 2026-07-14 at 8.44.36 PM -> 3 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:28:13 [INFO]   done: 3 segments written for WhatsApp Audio 2026-07-14 at 8.44.36 PM.ogg
+2026-07-16 18:28:13 [INFO] ======================================================================
+2026-07-16 18:28:13 [INFO] [fresh_recording] STAGE 1/2/3: processing WhatsApp Audio 2026-07-14 at 8.52.34 PM.ogg
+2026-07-16 18:28:14 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\fresh_recording\WhatsApp Audio 2026-07-14 at 8.52.34 PM.wav
+2026-07-16 18:28:14 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:14 [INFO] Segmented WhatsApp Audio 2026-07-14 at 8.52.34 PM -> 3 segments (1 too_short, 0 crosstalk).
+2026-07-16 18:28:14 [INFO]   done: 3 segments written for WhatsApp Audio 2026-07-14 at 8.52.34 PM.ogg
+2026-07-16 18:28:14 [INFO] ======================================================================
+2026-07-16 18:28:14 [INFO] [fresh_recording] STAGE 1/2/3: processing WhatsApp Audio 2026-07-14 at 8.56.02 PM.ogg
+2026-07-16 18:28:14 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\fresh_recording\WhatsApp Audio 2026-07-14 at 8.56.02 PM.wav
+2026-07-16 18:28:14 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:14 [INFO] Segmented WhatsApp Audio 2026-07-14 at 8.56.02 PM -> 3 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:28:14 [INFO]   done: 3 segments written for WhatsApp Audio 2026-07-14 at 8.56.02 PM.ogg
+2026-07-16 18:28:14 [INFO] ======================================================================
+2026-07-16 18:28:14 [INFO] [fresh_recording] STAGE 1/2/3: processing WhatsApp Audio 2026-07-14 at 9.19.31 PM.ogg
+2026-07-16 18:28:15 [INFO]   saved cleaned audio -> C:\Users\newst\OneDrive\Desktop\Context AI\processed\clean\fresh_recording\WhatsApp Audio 2026-07-14 at 9.19.31 PM.wav
+2026-07-16 18:28:15 [INFO] Diarization DISABLED (USE_DIARIZATION not set). Tagging all segments SPEAKER_0; crosstalk NOT evaluated.
+2026-07-16 18:28:15 [INFO] Segmented WhatsApp Audio 2026-07-14 at 9.19.31 PM -> 2 segments (0 too_short, 0 crosstalk).
+2026-07-16 18:28:15 [INFO]   done: 2 segments written for WhatsApp Audio 2026-07-14 at 9.19.31 PM.ogg
+2026-07-16 18:28:15 [INFO] ======================================================================
+2026-07-16 18:28:15 [INFO] DAY-1 PIPELINE SUMMARY
+2026-07-16 18:28:15 [INFO]   total segments created : 903
+2026-07-16 18:28:15 [INFO]   flagged too short      : 2
+2026-07-16 18:28:15 [INFO]   flagged crosstalk       : 0
+2026-07-16 18:28:15 [INFO]   transcribed (so far)    : 0
+2026-07-16 18:28:15 [INFO]   failures:
+2026-07-16 18:28:15 [INFO]     load errors           : 0
+2026-07-16 18:28:15 [INFO]     denoise errors        : 0
+2026-07-16 18:28:15 [INFO]     segment errors        : 0
+2026-07-16 18:28:15 [INFO]     diarize errors        : 0
+2026-07-16 18:28:15 [INFO]     save errors           : 0
+2026-07-16 18:28:15 [INFO]     manifest errors       : 0
+2026-07-16 18:28:15 [INFO]   manifest: C:\Users\newst\OneDrive\Desktop\Context AI\processed\manifest.jsonl
+2026-07-16 18:28:15 [INFO]   errors log: C:\Users\newst\OneDrive\Desktop\Context AI\processed\errors.log
+2026-07-16 18:28:15 [INFO] ======================================================================
+2026-07-16 18:28:53 [INFO] Starting transcription (backend=hf, model=openai/whisper-large-v3, force=False)
+2026-07-16 18:28:53 [INFO] Segments total=903 | verified(skipped)=0 | to-process=903 | unchanged=0
+2026-07-16 18:29:03 [INFO] Loading HuggingFace ASR model 'openai/whisper-large-v3' (CPU)...
+2026-07-16 18:29:23 [INFO] HuggingFace ASR model loaded.
+2026-07-16 19:35:50 [INFO] 20/903 segments transcribed (2.2%)
+2026-07-16 20:42:37 [INFO] 40/903 segments transcribed (4.4%)
